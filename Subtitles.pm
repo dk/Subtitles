@@ -1,4 +1,4 @@
-# $Id: Subtitles.pm,v 1.6 2004/09/22 12:54:15 dk Exp $
+# $Id: Subtitles.pm,v 1.7 2004/11/06 23:43:55 dk Exp $
 package Subtitles;
 use strict;
 require Exporter;
@@ -554,8 +554,8 @@ HEADER
    for ( $i = 0; $i < $n; $i++) {
       my ($fh,$fm,$fs,$fms) = Subtitles::time2hms($from->[$i]);
       my ($th,$tm,$ts,$tms) = Subtitles::time2hms($to->[$i]);
-      $fms = int ( $fms / 10 + .5);
-      $tms = int ( $tms / 10 + .5);
+      $fms = int ( $fms / 10);
+      $tms = int ( $tms / 10);
       my $t = $text->[$i];
       $t =~ s/\n/[br]/g;
       push @ret, 
