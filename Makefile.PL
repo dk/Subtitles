@@ -10,5 +10,5 @@ WriteMakefile(
     ($] >= 5.005 ?    ## Add these new keywords supported since 5.005
       (ABSTRACT_FROM => 'Subtitles.pm', # retrieve abstract from module
        AUTHOR     => 'Dmitry Karasik <dmitry@karasik.eu.org>') : ()),
-    'EXE_FILES'         => ['subs'],
+    'EXE_FILES'         => ['subs', 'subplay'],
 );
