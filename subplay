@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# $Id: subplay,v 1.1 2004/12/14 11:57:09 dk Exp $
+# $Id: subplay,v 1.2 2004/12/14 18:59:27 dk Exp $
 
 =pod
 
@@ -14,9 +14,9 @@ subplay my_movie.srt
 =head1 DESCRIPTION
 
 So, you think my player doesn't display subtitles? No, it does wery well.
-The reason for this script is that I'm learning Danish, and wanted to see
+The reason for this script is there, is that it happened so that I wanted to see
 a movie with both Danish and English subtitles. Usually, not a problem, if
-you've text susbtitles - but in my case one sub was in .srt text surmat,
+you've text subtitles - but in my case one sub was in .srt text format,
 while the another in .idx/.sub binary ( dvd-rip? ) format. I couldn't 
 find anything related, so this script was born.
 
@@ -86,6 +86,7 @@ for ( my $i = 0; $i < @$from; $i++) {
 	push @events, [ $$from[$i], $cue . $$text[$i]];
 	push @cues, [ $$to[$i], $$text[$i]];
 }
+push @events, [ $length + 0.1, ''];
 
 my $playing = 0;
 my $start_time;
@@ -96,6 +97,7 @@ my $w = Prima::MainWindow-> create(
 	height 		=> $window_height,
 	width		=> $::application-> width - $::application-> get_system_value( sv::XbsSizeable) * 2,
 	bottom		=> 0,
+	left		=> $::application-> get_system_value( sv::XbsSizeable),
 	text		=> $fn,
 	backColor	=> $back_color,
 	color		=> $fore_color,
