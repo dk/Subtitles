@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# $Id: subs,v 1.1 2004/05/24 13:16:47 dk Exp $
+# $Id: subs,v 1.2 2004/05/29 14:29:21 dk Exp $
 use strict;
 use Subtitles;
 
@@ -38,10 +38,11 @@ options:
    -o file   - file to save processed subtitles (default out.sub)
    -p t1 t2  - set a control point, where t1 is time of a phrase
                spoken in the film and t2 is time when the same 
-	       phrase as appears in the subtitle. One point is enough
-	       for deducing the -b coefficient, two points are enough
-	       for deducing both -a and -b coefficients. Times can
-	       be relative, f.ex. -p 01:00 +3.5 -p -20 1:00:00 
+	       phrase as appears in the subtitle. Two points are 
+	       required for deducing -a and -b coefficients; if 
+	       only one point is specified, it is assumed that
+	       the other one is [0,0]. Times can be relative, f.ex. 
+	       -p 01:00 +3.5 -p -20 1:00:00 
    -r rate   - force frame-per-second rate for frame-based subs
    -s time   - split in two parts by time
    -v        - be verbose
@@ -185,12 +186,9 @@ for (@points) {
    $_ = [$p1,$p2];
 }
 
-if ( 1 == @points) {
-   my ( $p1, $p2) = @{$points[0]};
-   die "-p option conflicts with -b\n" if defined $b;
-   $b = $p1 - $p2;
-   warn "control point [", time2str($p1), ",", time2str($p2), "]\n" if $verbose;
-} elsif ( 2 == @points) {
+unshift @points, [0,0] if 1 == @points;
+
+if ( 2 == @points) {
    my ( $p1, $p2) = @{$points[0]};
    my ( $r1, $r2) = @{$points[1]};
    ( $r1, $r2, $p1, $p2) = ( $p1, $p2, $r1, $r2) if $p1 > $r1;
@@ -344,9 +342,9 @@ File to save processed subtitles (default out.sub)
 =item -p t1 t2
 
 Set a control point, where t1 is time of a phrase spoken in the film and t2 is
-time when the same phrase as appears in the subtitle. One point is enough for
-deducing the -b coefficient, two points are enough for deducing both -a and -b
-coefficients. 
+time when the same phrase as appears in the subtitle. Two points are required
+for deducing -a and -b coefficients; if only one point is specified, it is
+assumed that the other one is [0,0].
 
 Times can be relative, f.ex. -p 01:00 +3.5 -p -20 1:00:00
 

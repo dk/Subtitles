@@ -24,9 +24,9 @@ If subtitles are for a movie in 25 fps, need to be for 24
 
    subs -i -a 24/25 file.sub
 
-If subtitles start ok, but in 1 hour are late in 7 seconds:
+If subtitles start 1 second too early, but in 1 hour are late in 7 seconds:
 
-   subs -i -p 0 0 -p 1:00:00 +7 file.sub
+   subs -i -p 0 -1 -p 1:00:00 +7 file.sub
 
 Join two parts with 15-second gap
   
