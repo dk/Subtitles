@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# $Id: subs,v 1.6 2004/09/22 12:54:15 dk Exp $
+# $Id: subs,v 1.7 2004/09/24 21:20:54 dk Exp $
 use strict;
 use Subtitles;
 
@@ -285,7 +285,7 @@ if ( $d) {
       my @clob = split("\n", $$text[$i]);
       my $min = 0.8 * @clob;
       next if $$to[$i] - $$from[$i] > $min;
-      next if $b > $qto || $e < $qfrom;
+      next if $$from[$i] > $qto || $$to[$i] < $qfrom;
       if ( $i < $n - 1 && $$to[$i] + $min > $$from[$i+1]) {
          $$to[$i] = $$from[$i+1] - 0.01;
       } else {
