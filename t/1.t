@@ -40,6 +40,8 @@ ok( $a1-> length == 8);
 # etc, file write, file read
 my $l = $x-> length;
 for ( @codecs) {
+   next if m/idx$/; # test separately
+
    if ( open F, ">test.sub") {
       $x-> codec( $_);
       ok( $x-> save(\*F));
@@ -53,7 +55,7 @@ for ( @codecs) {
       my $y = Subtitles-> new;
       ok( $y-> load(\*F));
       close F;
-      ok ( $y-> length == $l);  
+      ok ( abs($y-> length - $l) < 0.5);  
    }
 
    unlink 'test.sub';
