@@ -1,4 +1,4 @@
-# $Id: Subtitles.pm,v 1.2 2004/05/29 14:49:31 dk Exp $
+# $Id: Subtitles.pm,v 1.3 2004/06/03 17:19:49 dk Exp $
 package Subtitles;
 use strict;
 require Exporter;
@@ -415,7 +415,10 @@ sub read
 
    for ( @$content) {
       $line++;
-      m/^{(\d+)}{(\d*)}(.*)$/ or die "Invalid input at line $line\n";
+      unless ( m/^{(\d+)}{(\d*)}(.*)$/) {
+         warn "Invalid input at line $line\n";
+	 next;
+      }
       push @$from, $1/$fps;
       push @$to,   length($2) ? ($2/$fps) : ($1+1)/$fps;
       my $t = $3;
