@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# $Id: subs,v 1.2 2004/05/29 14:29:21 dk Exp $
+# $Id: subs,v 1.3 2004/06/13 18:35:50 dk Exp $
 use strict;
 use Subtitles;
 
@@ -189,33 +189,26 @@ for (@points) {
 unshift @points, [0,0] if 1 == @points;
 
 if ( 2 == @points) {
-   my ( $p1, $p2) = @{$points[0]};
-   my ( $r1, $r2) = @{$points[1]};
-   ( $r1, $r2, $p1, $p2) = ( $p1, $p2, $r1, $r2) if $p1 > $r1;
-   die "two -p option sets conflicts with -a and -b\n" if defined($a) || defined($b);
-   my ( $u1, $u2) = ( $p2 - $p1, $r2 - $r1);
-   my ( $t1, $t2) = ( $p2, $r2);
+   my ( $t1, $u1) = @{$points[0]};
+   my ( $t2, $u2) = @{$points[1]};
+   die "-p option conflicts with -a and -b\n" if defined($a) || defined($b);
    my ( $dt, $du) = ( $t2 - $t1, $u2 - $u1);
-   die "Point sets refers to the same time\n" if $dt == 0;
+   die "Point sets refers to the same time\n" if $dt == 0 || $du == 0;
 # 
-#    dt/du = (t2-t0)/(u2-u0), t0=0
-#    u0 = u2 - t2*du/dt
 # 
-#    |u(difference between subtitles and sound); u > 0 means subtitle is late
+#    |u(subtitles)
 #    |
 # u2 |             *
 # u1 |      *     
-# u0 *                    t(absolute time)
+#    |                    t(speech)
 #    ----------------------
-#    t0=0   t1     t2     
+#           t1     t2     
 #
-   $b = -($u2 - $t2 * $du / $dt);
-   die "Time [", time2str($r2), "] leads to singularity; please select another control point time\n"
-      if $r2 + $b == 0;
-   $a = $r1/($r2 + $b);
+   $a = $dt / $du;
+   $b = $t1 - $u1 * $a;
 
-   warn "control points [", time2str($p1), ",", time2str($p2), "], [",
-       time2str($r1), ",", time2str($r2),
+   warn "control points [", time2str($t1), ",", time2str($u1), "], [",
+       time2str($t2), ",", time2str($u2),
       "]\n" if $verbose;
    $b = time2str( $b);
 }
