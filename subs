@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# $Id: subs,v 1.3 2004/06/13 18:35:50 dk Exp $
+# $Id: subs,v 1.4 2004/07/02 18:58:34 dk Exp $
 use strict;
 use Subtitles;
 
@@ -269,7 +269,8 @@ if ( defined $split) {
 } else {
 # just save
    warn "write ".$dest->lines." line(s) in '$out'\n" if $verbose;
-   if ( $inplace) {
+   my $rename = $inplace or -f $out;
+   if ( $rename) {
       rename $out, "$out.bak" or die "Cannot rename $out to $out.bak:$!\n";
    }
    eval {
@@ -278,7 +279,7 @@ if ( defined $split) {
       close F;
    };
    if ( $@) {
-      rename "$out.bak", $out if $inplace;
+      rename "$out.bak", $out if $rename;
       die $@;
    }
 }
