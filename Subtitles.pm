@@ -1,4 +1,4 @@
-# $Id: Subtitles.pm,v 1.5 2004/07/10 17:05:58 dk Exp $
+# $Id: Subtitles.pm,v 1.6 2004/09/22 12:54:15 dk Exp $
 package Subtitles;
 use strict;
 require Exporter;
@@ -411,7 +411,7 @@ sub read
    my $line = 0;
 # {3724}{3774}Text
 
-   my $fps = $sub->{rate} ? $sub->{rate} : 25;
+   my $fps = $sub->{rate} ? $sub->{rate} : 23.976;
    my $from = $sub->{from};
    my $to   = $sub->{to};
    my $text = $sub->{text};
@@ -435,7 +435,7 @@ sub write
 {
    my ( $self, $sub) = @_;
    
-   my $fps = $sub->{rate} ? $sub->{rate} : 25;
+   my $fps = $sub->{rate} ? $sub->{rate} : 23.976;
 
    my $n = @{$sub->{text}};
    my $i;
