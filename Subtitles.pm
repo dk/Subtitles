@@ -1,4 +1,4 @@
-# $Id: Subtitles.pm,v 1.3 2004/06/03 17:19:49 dk Exp $
+# $Id: Subtitles.pm,v 1.4 2004/07/02 18:55:55 dk Exp $
 package Subtitles;
 use strict;
 require Exporter;
@@ -6,7 +6,7 @@ use vars qw(@ISA @EXPORT @EXPORT_OK @codecs $VERSION);
 @ISA = qw(Exporter);
 @EXPORT = qw(codecs time2str);
 @EXPORT_OK = qw(codecs time2hms time2shms hms2time time2str);
-$VERSION = '0.04';
+$VERSION = '0.05';
 
 
 push @codecs, map { "Subtitles::Codec::$_" } qw( srt mdvd sub2 smi);
