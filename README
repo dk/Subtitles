@@ -5,10 +5,10 @@ Movie files can be viewed with subtitles, which are currently
 very popular as text files. The command line tool 'subs' and 
 its perl backend Subtitles.pm provide means for simple loading, 
 re-timing, converting, and storing these subtitle files. 
-Supported formats are .srt, .sub, and .smi. It can easily be extended. 
+Supported formats are .srt, .sub, .smi, and .idx. It can easily be extended. 
 
 
-The module supports .srt, .sub, and .smi subtitle formats.
+The module supports .srt, .sub, .smi, and .idx subtitle formats.
 
 USAGE
 =====

@@ -1,4 +1,4 @@
-# $Id: Subtitles.pm,v 1.8 2004/11/06 23:46:36 dk Exp $
+# $Id: Subtitles.pm,v 1.9 2004/12/13 21:41:02 dk Exp $
 package Subtitles;
 use strict;
 require Exporter;
@@ -9,7 +9,7 @@ use vars qw(@ISA @EXPORT @EXPORT_OK @codecs $VERSION);
 $VERSION = '0.06';
 
 
-push @codecs, map { "Subtitles::Codec::$_" } qw( srt mdvd sub2 smi);
+push @codecs, map { "Subtitles::Codec::$_" } qw( srt mdvd sub2 smi idx);
 
 #
 # package-oriented API
@@ -768,6 +768,138 @@ sub downgrade
       s/<[^\>]*>//g;
       s/{[^\}]*}//g;
    }
+}
+
+package Subtitles::Codec::idx;
+use vars qw(@ISA);
+@ISA=qw(Subtitles::Codec);
+
+sub match
+{
+   $_[1] =~ m/^\s*\#\s*VobSub index file/
+}
+
+sub read
+{
+   my ( $self, $sub, $content) = @_;
+
+   my $line = 0;
+# # VobSub index file, v7 (do not modify this line!)
+# # 
+# # To repair desyncronization, you can insert gaps this way:
+# # (it usually happens after vob id changes)
+# # 
+# #	 delay: [sign]hh:mm:ss:ms
+# # 
+# # Where:
+# #	 [sign]: +, - (optional)
+# #	 hh: hours (0 <= hh)
+# #	 mm/ss: minutes/seconds (0 <= mm/ss <= 59)
+# #	 ms: milliseconds (0 <= ms <= 999)
+# # 
+# #	 Note: You can't position a sub before the previous with a negative value.
+# # 
+# # You can also modify timestamps or delete a few subs you don't like.
+# # Just make sure they stay in increasing order.
+# 
+# 
+# # Settings
+# 
+# # Original frame size
+# size: 720x576
+# 
+# # Origin, relative to the upper-left corner, can be overloaded by aligment
+# org: 0, 0
+# 
+# # Image scaling (hor,ver), origin is at the upper-left corner or at the alignment coord (x, y)
+# scale: 100%, 100%
+# 
+# # Alpha blending
+# alpha: 100%
+# 
+# # Smoothing for very blocky images (use OLD for no filtering)
+# smooth: OFF
+# 
+# # In millisecs
+# fadein/out: 50, 50
+# 
+# # Force subtitle placement relative to (org.x, org.y)
+# align: OFF at LEFT TOP
+# 
+# # For correcting non-progressive desync. (in millisecs or hh:mm:ss:ms)
+# # Note: Not effective in DirectVobSub, use "delay: ... " instead.
+# time offset: 0
+# 
+# # ON: displays only forced subtitles, OFF: shows everything
+# forced subs: OFF
+# 
+# # The original palette of the DVD
+# palette: 0000e1, e83f07, 000000, fdfdfd, 033a03, ea12eb, faff1a, 095d76, 7c7c7c, e0e0e0, 701f03, 077307, 00006c, cc0ae9, d2ab0f, 730972
+# 
+# # Custom colors (transp idxs and the four colors)
+# custom colors: OFF, tridx: 1000, colors: fdfdfd, 000000, e0e0e0, faff1a
+# 
+# # Language index in use
+# langidx: 0
+# 
+# # Dansk
+# id: da, index: 0
+# # Decomment next line to activate alternative name in DirectVobSub / Windows Media Player 6.x
+# # alt: Dansk
+# # Vob/Cell ID: 3, 1 (PTS: 0)
+# timestamp: 00:00:44:280, filepos: 000000000
+# timestamp: 00:00:50:520, filepos: 000003000
+
+   my $from = $sub->{from};
+   my $to   = $sub->{to};
+   my $text = $sub->{text};
+   my @header;
+
+   my $read_header = 1;
+   my $state = 0;
+
+   my @comments;
+
+   for ( @$content) {
+      if ( m/^\s*timestamp\:\s*(\d\d)\:(\d\d)\:(\d\d)\:(\d+).*?filepos\:\s*(.*)$/) {
+         push @$from, Subtitles::hms2time( $1, $2, $3, $4);
+         push @$text, $5;
+      } else {
+         push @comments, [ scalar @$from, $_ ];
+      }
+      $line++;
+   }
+
+   for ( $line = 0; $line < @$from - 1; $line++) {
+   	$$to[$line] = $$from[$line + 1] - 0.002;
+   }
+   push @$to, $$from[-1] + 2.0 if @$from;
+
+   $sub->{idx}->{comments} = \@comments;
+
+   1;
+}
+
+sub write
+{
+   my ( $self, $sub) = @_;
+
+   die "The idx format subtitles cannot be created from the other formats\n"
+   	unless $sub->{idx}->{comments};
+
+   my $from = $sub->{from};
+   my $to   = $sub->{to};
+   my $text = $sub->{text};
+   my $c    = $sub->{idx}->{comments};
+   my ( $i, $j);
+   my $n = @$text;
+   my @ret;
+   for ( $i = $j = 0; $i < $n; $i++) {
+      push @ret, $$c[$j++][1] while $j < @$c and $$c[$j][0] <= $i;
+      push @ret, sprintf( "timestamp: %02d:%02d:%02d:%03d, filepos: %s",
+         Subtitles::time2hms($from->[$i]), $text->[$i]);
+   }
+   \@ret;
 }
 
 1;
