@@ -1,0 +1,58 @@
+Subtitles 
+=========
+
+Movie files can be viewed with subtitles, which are currently 
+very popular as text files. The command line tool 'subs' and 
+its perl backend Subtitles.pm provide means for simple loading, 
+re-timing, converting, and storing these subtitle files. 
+Supported formats are .srt, .sub, and .smi. It can easily be extended. 
+
+
+The module supports .srt, .sub, and .smi subtitle formats.
+
+USAGE
+=====
+
+Warning: -i is a great feature, but use it with certain caution.
+
+If subtitles are shown too early ( 5 seconds):
+
+   subs -i -b 5 file.sub
+
+If subtitles are for a movie in 25 fps, need to be for 24
+( actual for frame-based formats only ).
+
+   subs -i -a 24/25 file.sub
+
+If subtitles start ok, but in 1 hour are late in 7 seconds:
+
+   subs -i -p 0 0 -p 1:00:00 +7 file.sub
+
+Join two parts with 15-second gap
+  
+    subs -o joined.sub -j 15 part1.sub part2.sub 
+
+Split in two after 50 minutes and half a second ( makes basename.1.sub
+and basename.2.sub ).
+
+    subs -o basename.sub -s 50:00.5 toobig.sub
+
+INSTALLATION
+============
+
+To install this module type the following:
+
+   perl Makefile.PL
+   make
+   make test
+   make install
+
+
+COPYRIGHT AND LICENCE
+=====================
+
+Copyright (C) 2004 Dmitry Karasik
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself. 
+
