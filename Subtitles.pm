@@ -1,4 +1,4 @@
-# $Id: Subtitles.pm,v 1.4 2004/07/02 18:55:55 dk Exp $
+# $Id: Subtitles.pm,v 1.5 2004/07/10 17:05:58 dk Exp $
 package Subtitles;
 use strict;
 require Exporter;
@@ -182,16 +182,19 @@ sub scale { $_[0]-> transform( $_[1], 0) }
 
 sub lines { scalar @{$_[0]->{text}} }
 
-# applies linear (y = ax+b) transformation
+# applies linear (y = ax+b) transformation within a scope
 sub transform
 {
-   my ( $self, $a, $b) = @_;
+   my ( $self, $a, $b, $qfrom, $qto) = @_;
    return if $a == 1 && $b == 0;
+   $qfrom = 0 unless defined $qfrom;
+   $qto   = $self->{to}->[-1] unless defined $qto;
    my $i;
    my $n = $self-> lines;
    my $from = $self->{from};
    my $to   = $self->{to};
    for ( $i = 0; $i < $n; $i++) {
+      next if $$from[$i] > $qto || $$to[$i] < $qfrom;
       $$from[$i] = $a * $$from[$i] + $b;
       $$to[$i]   = $a * $$to[$i] + $b;
    }
@@ -805,6 +808,7 @@ Time values are floats, in seconds with millisecond precision.
 
    # or both
    $sub-> transform( -120, 0.96);
+   $sub-> transform( -120, 0.96, 0, $sub-> length - 60);
 
    # split for 2 parts
    my ( $part1, $part2) = $sub-> split( $self-> length / 2);
@@ -925,11 +929,13 @@ two newly created instances of the same class,
 by TIME, and returns these. The both resulting 
 subtitles begin at time 0.
 
-=item transform A, B
+=item transform A, B [FROM, TO]
 
 Applies linear transformation to the time-scale,
 such as C<u = At + B> where C<t> is the original 
-time and C<u> is the result.
+time and C<u> is the result. If FROM and TO 
+brackets are set, the changes are applied only
+to the lines in the timeframe between these.
 
 =back
 

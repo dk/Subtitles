@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# $Id: subs,v 1.4 2004/07/02 18:58:34 dk Exp $
+# $Id: subs,v 1.5 2004/07/10 17:05:58 dk Exp $
 use strict;
 use Subtitles;
 
@@ -14,6 +14,8 @@ my $verbose;
 my $codec;
 my $rate;
 my @points;
+my @q = (0, 'end');
+my $do_q;
 my $inplace;
 
 sub usage
@@ -43,8 +45,12 @@ options:
 	       only one point is specified, it is assumed that
 	       the other one is [0,0]. Times can be relative, f.ex. 
 	       -p 01:00 +3.5 -p -20 1:00:00 
-   -r rate   - force frame-per-second rate for frame-based subs
+   -r rate   - force frame-per-second rate for frame-based subs.
+               Useful numbers are 23.956, 24, 25.
    -s time   - split in two parts by time
+   -q t1 t2  - restrict changes, if any, in time span t1-t2. Word
+               'end' can be used as an alias to the end of the 
+	       file. Default values are '0' and 'end'.
    -v        - be verbose
 
 time format is either [[HH:]MM:]SS[.MSEC] or subtitle format-specific
@@ -97,6 +103,7 @@ USAGE
 	    my @c = map { s/Subtitles::Codec:://; $_ } codecs;
             my %c = map { $_ => 1 } @c;
             die "Invalid codec name `$codec'; valid are: @c\n" unless exists $c{$codec};
+	    $do = 1;
 	 } elsif ( $1 eq 'b') {
 	    $b = nextarg;
 	    $do = 1;
@@ -104,6 +111,10 @@ USAGE
 	    die "Too many control points\n" if 2 == @points;
 	    push @points, [ nextarg, nextarg ];
 	    $do = 1;
+	 } elsif ( $1 eq 'q') {
+	    die "Too many brackets\n" if $do_q;
+	    @q = (nextarg, nextarg);
+	    $do_q = 1;
 	 } elsif ( $1 eq 'r') {
 	    $rate = nextarg;
 	    die "Invalid rate `$rate'\n" unless $rate =~ /^\d+(\.\d+)?$/;
@@ -163,6 +174,7 @@ if ( defined $split) {
    $split = $s;
    warn "split by ". time2str($s) . "\n" if $verbose;
 }
+
 
 # points
 for (@points) {
@@ -227,7 +239,22 @@ if ( defined $b) {
 
 # process
 $dest-> join( $_, $jtime) for @entries; # join
-$dest-> transform( $a, $b);
+
+# brackets and transform
+my $vv_q = "brackets [ ";
+for ( @q) {
+   if ( $_ eq 'end') {
+      $_ = $dest-> length;
+   } else {
+      my $q = $dest-> parse_time( $_);
+      die "Cannot parse time `$_'\n" unless defined $q;
+      $_ = $q;
+   }
+   $vv_q .= time2str($_) . ' ';
+}
+warn "$vv_q ]\n" if $verbose;
+$dest-> transform( $a, $b, @q);
+
 if ( $d) {
    my $i = 0;
    my $from = $dest->{from};
@@ -341,6 +368,11 @@ for deducing -a and -b coefficients; if only one point is specified, it is
 assumed that the other one is [0,0].
 
 Times can be relative, f.ex. -p 01:00 +3.5 -p -20 1:00:00
+
+=item -q t1 t2
+
+Restrict changes, if any, in time span t1-t2. Word 'end' can be used as an
+alias to the end of the file. Default values are '0' and 'end'.
 
 =item -r rate
 
