@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# $Id: subs,v 1.7 2004/09/24 21:20:54 dk Exp $
+# $Id: subs,v 1.8 2004/11/15 20:13:11 dk Exp $
 use strict;
 use Subtitles;
 
@@ -502,6 +502,10 @@ Split in two after 50 minutes and half a second ( makes basename.1.sub
 and basename.2.sub ).
 
     subs -o basename.sub -s 50:00.5 toobig.sub
+
+Remove closed caption-specific comments such as '[Sneezing]' or '[Music playing]'
+
+    subs -e 's/[\s-]*\[.*\]\s*\n*//gs' sub.sub
 
 =head1 BUGS
 

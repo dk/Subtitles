@@ -37,6 +37,11 @@ and basename.2.sub ).
 
     subs -o basename.sub -s 50:00.5 toobig.sub
 
+Remove closed caption-specific comments such as '[Sneezing]' or '[Music playing]'
+
+    subs -e 's/[\s-]*\[.*\]\s*\n*//gs' sub.sub
+
+
 INSTALLATION
 ============
 
