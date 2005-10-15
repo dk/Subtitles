@@ -1,4 +1,4 @@
-# $Id: Subtitles.pm,v 1.11 2005/10/05 19:02:44 dk Exp $
+# $Id: Subtitles.pm,v 1.12 2005/10/15 15:56:53 dk Exp $
 package Subtitles;
 use strict;
 require Exporter;
@@ -462,7 +462,8 @@ use vars qw(@ISA);
 
 sub match
 {
-	$_[1] =~ m/^\[(SUBTITLE|COLF)\]/i; 
+	$_[1] =~ m/^\[(SUBTITLE|COLF)\]/i or
+	$_[1] =~ m/^(\d\d):(\d\d):(\d\d)\.(\d\d),(\d\d):(\d\d):(\d\d)\.(\d\d)/;
 }
 
 sub read
