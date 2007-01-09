@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# $Id: subs,v 1.8 2004/11/15 20:13:11 dk Exp $
+# $Id: subs,v 1.9 2007/01/09 21:28:12 dk Exp $
 use strict;
 use Subtitles;
 
@@ -57,6 +57,8 @@ options:
 	       only one point is specified, it is assumed that
 	       the other one is [0,0]. Times can be relative, f.ex. 
 	       -p 01:00 +3.5 -p -20 1:00:00 
+   -P t2 t1    same as -p but reversed arguments ( use if -p was 
+               given in wrong order )
    -r rate   - force frame-per-second rate for frame-based subs.
                Useful numbers are 23.976, 24, 25.
    -s time   - split in two parts by time
@@ -122,9 +124,11 @@ USAGE
 	 } elsif ( $1 eq 'b') {
 	    $b = nextarg;
 	    $do = 1;
-	 } elsif ( $1 eq 'p') {
+	 } elsif ( $1 eq 'p' or $1 eq 'P') {
 	    die "Too many control points\n" if 2 == @points;
-	    push @points, [ nextarg, nextarg ];
+	    my @x = (nextarg, nextarg);
+	    @x = reverse @x if $1 eq 'P';
+	    push @points, \@x;
 	    $do = 1;
 	 } elsif ( $1 eq 'q') {
 	    die "Too many brackets\n" if $do_q;
@@ -445,7 +449,7 @@ Time interval between joins, seconds (default 2)
 
 File to save processed subtitles (default out.sub)
 
-=item -p t1 t2
+=item -p t1 t2 or -P t2 t1
 
 Set a control point, where t1 is time of a phrase spoken in the film and t2 is
 time when the same phrase as appears in the subtitle. Two points are required
@@ -453,6 +457,9 @@ for deducing -a and -b coefficients; if only one point is specified, it is
 assumed that the other one is [0,0].
 
 Times can be relative, f.ex. -p 01:00 +3.5 -p -20 1:00:00
+
+Options -P and -p are the same except the argument sequence is reversed.  -P is
+to be used when arguments to -p were typed manually and in wrong order.
 
 =item -q t1 t2
 
