@@ -1,4 +1,4 @@
-# $Id: Subtitles.pm,v 1.12 2005/10/15 15:56:53 dk Exp $
+# $Id: Subtitles.pm,v 1.13 2007/02/12 11:12:00 dk Exp $
 package Subtitles;
 use strict;
 require Exporter;
@@ -887,11 +887,11 @@ Subtitles - fix timing for subtitles in various text formats
 
 =head1 DESCRIPTION
 
-Movie files can be viewed with subtitles, which are currently
-very popular as text files. C<Subtitles> provides means for
-simple loading, re-timing, and storing these subtitle files.
-A command-line tool F<subs> for the same purpose and using
-C<Subtitles> interface is included in the distribution.
+Video files (avi mpeg etc) are sometimes accompanied with subtitles, which are
+currently very popular as text files. C<Subtitles> provides means for simple
+loading, re-timing, and storing these subtitle files.  A command-line tool
+F<subs> for the same purpose and using C<Subtitles> interface is included in
+the distribution.
 
 The module supports C<srt>, C<sub>, C<smi> subtitle formats.
 
