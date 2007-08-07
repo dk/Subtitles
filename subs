@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# $Id: subs,v 1.9 2007/01/09 21:28:12 dk Exp $
+# $Id: subs,v 1.10 2007/08/07 19:05:28 dk Exp $
 use strict;
 use Subtitles;
 
@@ -11,6 +11,7 @@ my $b;
 my $d;
 my @eval;
 my $split;
+my $separate;
 my $verbose;
 my $codec;
 my $rate;
@@ -50,6 +51,7 @@ options:
    -i        - edit files in place ( makes backup in .bak files )
    -j sec    - time interval between joins, seconds (default 2)
    -o file   - file to save processed subtitles (default out.sub)
+   -O        - separate overlapped lines
    -p t1 t2  - set a control point, where t1 is time of a phrase
                spoken in the film and t2 is time when the same 
 	       phrase as appears in the subtitle. Two points are 
@@ -98,6 +100,9 @@ USAGE
 	 } elsif ( $1 eq 'o') {
 	    $out  = nextarg;
 	    $set_o = 1;
+	 } elsif ( $1 eq 'O') {
+	    $separate = 1;
+	    $do = 1;
 	 } elsif ( $1 eq 'j') {
 	    $jtime = nextarg;
 	    die "Invalid -j parameter\n" unless $jtime =~ /^\d+(\.\d+)?/;
@@ -300,6 +305,29 @@ if ( $d) {
    warn "$c lines prolonged\n";
 }
 
+# -O
+if ( $separate) {
+   my $from = $dest->{from};
+   my $to   = $dest->{to};
+   my $text = $dest->{text};
+   my $n = @$from;
+   my $c = 0;
+   my ($qfrom, $qto) = @q;
+   $qfrom = 0 unless defined $qfrom;
+   $qto   = $$to[-1] unless defined $qto;
+   for ( my $i = 0; $i < $n - 1; $i++) {
+      next if $$from[$i] > $qto || $$to[$i + 1] < $qfrom;
+      my $d = $$to[$i] - $$from[$i + 1];
+      next if $d < 0;
+      $d = 0.002 if $d < 0.002;
+      $d /= 2.0;
+      $$to[$i]     -= $d;
+      $$from[$i+1] += $d + 0.001;
+      $c++;
+   }
+   warn "$c overlapped lines separated\n";
+}
+
 # -e
 if ( @eval) {
    my $i = 0;
@@ -448,6 +476,10 @@ Time interval between joins, seconds (default 2)
 =item -o file
 
 File to save processed subtitles (default out.sub)
+
+=item -O
+
+Separate overlapped lines
 
 =item -p t1 t2 or -P t2 t1
 
