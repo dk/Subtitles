@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# $Id: subs,v 1.13 2007/11/05 20:20:08 dk Exp $
+# $Id: subs,v 1.14 2007/11/12 06:06:51 dk Exp $
 use strict;
 use Subtitles;
 
@@ -18,7 +18,7 @@ my $rate;
 my @points;
 my @q = (0, 'end');
 my $do_q;
-my $zap;
+my $zip;
 my $inplace;
 
 sub usage
@@ -69,7 +69,7 @@ options:
                'end' can be used as an alias to the end of the 
 	       file. Default values are '0' and 'end'.
    -v        - be verbose
-   -z file2  - zap subtitle files so time information is read from
+   -z file2  - zip subtitle files so time information is read from
                file2, while text information is read from input file
 
 time format is either [[HH:]MM:]SS[.MSEC] or subtitle format-specific
@@ -153,7 +153,7 @@ USAGE
 				$split = nextarg;
 				$do = 1;
 			} elsif ( $1 eq 'z') {
-				$zap = nextarg;
+				$zip = nextarg;
 				$do = 1;
 			} else {
 				die "Unknown option `-$1'\n";
@@ -176,7 +176,7 @@ USAGE
 # read files
 my $dest;
 my @entries;
-for my $fn ( grep { defined } ( @in, $zap)) {
+for my $fn ( grep { defined } ( @in, $zip)) {
 	my $entry = Subtitles->new();
 	$entry-> rate( $rate) if $rate;
 	my $ret;
@@ -197,7 +197,7 @@ for my $fn ( grep { defined } ( @in, $zap)) {
 	}
 	push @entries, $entry;
 }
-$zap = pop @entries if $zap;
+$zip = pop @entries if $zip;
 $dest = shift @entries;
 
 # validate time-based parameters
@@ -274,21 +274,21 @@ if ( defined $b) {
 # process
 $dest-> join( $_, $jtime) for @entries; # join
 
-# zap
-if ( $zap) {
-	my $f1 = $zap->{from};
-	my $t1 = $zap->{to};
+# zip
+if ( $zip) {
+	my $f1 = $zip->{from};
+	my $t1 = $zip->{to};
 	my $f2 = $dest->{from};
 	my $t2 = $dest->{to};
 	my $x2 = $dest->{text};
 	my $n1 = @$f1;
 	my $n2 = @$f2;
 	if ( $n2 > $n1) {
-		warn "zap: $n1 timeslices available while $n2 found in input -- ".
+		warn "zip: $n1 timeslices available while $n2 found in input -- ".
 		  "timeframes after ". time2str( $f2->[$n1] ).
 		  ", #$n1, will be left unchanged\n"
 	} elsif ( $n2 < $n1) {
-		warn "zap: $n2 timeslices available while only $n1 found in input -- " .
+		warn "zip: $n2 timeslices available while only $n1 found in input -- " .
 		"padding with empty lines\n";
 		for ( my $i = $n2; $i < $n1; $i++) {
 			push @$f2, $$f1[$i];
@@ -550,7 +550,7 @@ Be verbose
 
 =item -z file.sub
    
-Zap subtitle files so time information is read from file.sub, while text
+Zip subtitle files so time information is read from file.sub, while text
 information is read from the input file(s).
 
 =back

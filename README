@@ -42,7 +42,7 @@ Separate overlapped lines
 
     subs -O subs.sub
 
-Zap two subtitles together -- read time information from one, text from another
+Zip two subtitles together -- read time information from one, text from another
 
     subs -z time.sub text.sub
 
