@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# $Id: subs,v 1.15 2008/03/07 11:36:03 dk Exp $
+# $Id: subs,v 1.16 2008/03/07 22:24:49 dk Exp $
 use strict;
 use Subtitles;
 
@@ -109,7 +109,7 @@ USAGE
 			} elsif ( $1 eq 'j') {
 				$jtime = nextarg;
 				die "Invalid -j parameter\n"
-					unless $jtime =~ /^[+-]?\d+(\.\d+)?/;
+					unless $jtime =~ /^[-+]?\d+(\.\d+)?/;
 			} elsif ( $1 eq 'd') {
 				$d = 1;
 				$do = 1;
