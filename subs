@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# $Id: subs,v 1.14 2007/11/12 06:06:51 dk Exp $
+# $Id: subs,v 1.15 2008/03/07 11:36:03 dk Exp $
 use strict;
 use Subtitles;
 
@@ -215,7 +215,7 @@ for (@points) {
 	my ( $p1, $p2) = @$_;
 	my ( $s1, $s2);
 	$s1 = (($p1 =~ s/^([-+])//) ? $1 : '');
-	$s2 = (($p2 =~ s/^([-+])//) ? $2 : '');
+	$s2 = (($p2 =~ s/^([-+])//) ? $1 : '');
 	my $t = $dest-> parse_time( $p1);
 	die "Cannot parse time `$s1$p1'\n" unless defined $t;
 	$p1 = $t;
