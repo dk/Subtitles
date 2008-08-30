@@ -1,4 +1,4 @@
-# $Id: Subtitles.pm,v 1.15 2007/08/07 19:05:28 dk Exp $
+# $Id: Subtitles.pm,v 1.16 2008/08/30 21:25:23 dk Exp $
 package Subtitles;
 use strict;
 require Exporter;
@@ -6,7 +6,7 @@ use vars qw(@ISA @EXPORT @EXPORT_OK @codecs $VERSION);
 @ISA = qw(Exporter);
 @EXPORT = qw(codecs time2str);
 @EXPORT_OK = qw(codecs time2hms time2shms hms2time time2str);
-$VERSION = '1.00';
+$VERSION = '1.01';
 
 
 push @codecs, map { "Subtitles::Codec::$_" } qw( srt mdvd sub2 smi idx);
@@ -401,7 +401,7 @@ use vars qw(@ISA);
 
 sub match
 {
-	$_[1] =~ m/^{\d+}{\d*}/; 
+	$_[1] =~ m/^[{\[]\d+[}\]][{\[]\d*[}\]]/; 
 }
 
 sub read
@@ -418,7 +418,7 @@ sub read
 
 	for ( @$content) {
 		$line++;
-		unless ( m/^{(\d+)}{(\d*)}(.*)$/) {
+		unless ( m/^[{\[](\d+)[}\]][{\[](\d*)[}\]](.*)$/) {
 			warn "Invalid input at line $line\n";
 			next;
 		}
