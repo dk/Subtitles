@@ -1,4 +1,4 @@
-# $Id: Subtitles.pm,v 1.16 2008/08/30 21:25:23 dk Exp $
+# $Id: Subtitles.pm,v 1.17 2008/09/03 16:29:00 dk Exp $
 package Subtitles;
 use strict;
 require Exporter;
@@ -883,7 +883,7 @@ sub write
 
 =head1 NAME
 
-Subtitles - fix timing for subtitles in various text formats
+Subtitles - handle video subtitles in various text formats
 
 =head1 DESCRIPTION
 
@@ -893,7 +893,7 @@ loading, re-timing, and storing these subtitle files.  A command-line tool
 F<subs> for the same purpose and using C<Subtitles> interface is included in
 the distribution.
 
-The module supports C<srt>, C<sub>, C<smi> subtitle formats.
+The module supports C<srt>, C<sub>, C<smi>, and C<mdvd> subtitle formats.
 
 Time values are floats, in seconds with millisecond precision.
 
@@ -917,7 +917,7 @@ Time values are floats, in seconds with millisecond precision.
 	$sub-> transform( -120, 0.96);
 	$sub-> transform( -120, 0.96, 0, $sub-> length - 60);
 
-	# split for 2 parts
+	# split in 2
 	my ( $part1, $part2) = $sub-> split( $self-> length / 2);
 
 	# join back with 5-second gap 
