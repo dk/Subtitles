@@ -1,4 +1,4 @@
-# $Id: Subtitles.pm,v 1.17 2008/09/03 16:29:00 dk Exp $
+# $Id: Subtitles.pm,v 1.18 2008/12/03 17:04:29 dk Exp $
 package Subtitles;
 use strict;
 require Exporter;
@@ -6,7 +6,7 @@ use vars qw(@ISA @EXPORT @EXPORT_OK @codecs $VERSION);
 @ISA = qw(Exporter);
 @EXPORT = qw(codecs time2str);
 @EXPORT_OK = qw(codecs time2hms time2shms hms2time time2str);
-$VERSION = '1.01';
+$VERSION = '1.02';
 
 
 push @codecs, map { "Subtitles::Codec::$_" } qw( srt mdvd sub2 smi idx);
@@ -324,7 +324,7 @@ use vars qw(@ISA);
 
 sub match
 {
-	$_[1] =~ m/^(\d\d):(\d\d):(\d\d)\,(\d\d\d)\s*-->\s*(\d\d):(\d\d):(\d\d)\,(\d\d\d)/;
+	$_[1] =~ m/^(\d\d):(\d\d):(\d\d)[.,](\d\d\d)\s*-->\s*(\d\d):(\d\d):(\d\d)[.,](\d\d\d)/;
 }
 
 sub read
@@ -348,7 +348,7 @@ sub read
 			$stage++;
 		} elsif ( $stage == 1) {
 			die "Invalid timing at line $line\n" unless
-				m/^(\d\d):(\d\d):(\d\d)\,(\d\d\d)\s*-->\s*(\d\d):(\d\d):(\d\d)\,(\d\d\d)/;
+				m/^(\d\d):(\d\d):(\d\d)[.,](\d\d\d)\s*-->\s*(\d\d):(\d\d):(\d\d)[.,](\d\d\d)/;
 			push @{$sub->{from}}, Subtitles::hms2time( $1, $2, $3, $4);
 			push @{$sub->{to}},   Subtitles::hms2time( $5, $6, $7, $8); 
 			$stage++;
