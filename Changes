@@ -19,3 +19,6 @@ Revision history for Perl extension Subtitles.
 
 1.02	Dec 3 2008
 	- recognize dot in srt codec
+
+1.03    Apr 1 2010
+	- read u16 text
