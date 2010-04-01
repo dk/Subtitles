@@ -1,4 +1,4 @@
-# $Id: Subtitles.pm,v 1.18 2008/12/03 17:04:29 dk Exp $
+# $Id: Subtitles.pm,v 1.19 2010/04/01 14:01:19 dk Exp $
 package Subtitles;
 use strict;
 require Exporter;
@@ -79,9 +79,15 @@ sub load
 {
 	my ( $self, $fh, $codec) = @_;
 	$self-> clear;
+	local $/;
+	my $content = <$fh>;
+	if ( $content =~ s/^(\xff\xfe|\xfe\xff)//) {
+		# found a bom
+		my $le = ( $1 eq "\xff\xfe" ) ? 'v*' : 'n*';
+		$content = join('', map { chr } unpack($le, $content));
+	}
 	my @content;
-	while (<$fh>) {
-		chomp;
+	for ( split "\n", $content) {
 		s/[\s\n\r]+$//;
 		push @content, $_;
 	}
