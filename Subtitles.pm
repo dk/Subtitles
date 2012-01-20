@@ -1,4 +1,4 @@
-# $Id: Subtitles.pm,v 1.20 2010/04/01 14:02:12 dk Exp $
+# $Id: Subtitles.pm,v 1.21 2012/01/20 21:31:39 dk Exp $
 package Subtitles;
 use strict;
 require Exporter;
@@ -7,6 +7,8 @@ use vars qw(@ISA @EXPORT @EXPORT_OK @codecs $VERSION);
 @EXPORT = qw(codecs time2str);
 @EXPORT_OK = qw(codecs time2hms time2shms hms2time time2str);
 $VERSION = '1.03';
+		
+use Encode;
 
 
 push @codecs, map { "Subtitles::Codec::$_" } qw( srt mdvd sub2 smi idx);
@@ -82,9 +84,12 @@ sub load
 	local $/;
 	my $content = <$fh>;
 	if ( $content =~ s/^(\xff\xfe|\xfe\xff)//) {
-		# found a bom
+		# found a 16-bit bom
 		my $le = ( $1 eq "\xff\xfe" ) ? 'v*' : 'n*';
 		$content = join('', map { chr } unpack($le, $content));
+	} elsif ( $content =~ s/^\xef\xbb\xbf//) {
+		# found a utf-8 bom
+		Encode::_utf8_on($content);
 	}
 	my @content;
 	for ( split "\n", $content) {
@@ -289,14 +294,19 @@ sub save
 	my $content;
 	eval {
 		$content = $self-> {codec}-> write( $self);
+		die "no content" unless defined $content and @$content;
+
+		$content = CORE::join("\n", @$content);
+		if ( Encode::is_utf8($content)) {
+			# bomify
+			print $fh "\xef\xbb\xbf" or die "write error:$!";
+			binmode $fh, ':utf8';
+		}
+
+		print $fh $content, "\n" or die "write error:$!"; 
 	};
-	return 0 if $@ or ! defined $content;
-	for ( @$content) {
-		next if print $fh $_, "\n";
-		$@ = "write error: $!";
-		return 0;
-	}
-	1;
+
+	return $@ ? 0 : 1;
 }
 
 package Subtitles::Codec;
