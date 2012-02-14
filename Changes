@@ -22,3 +22,6 @@ Revision history for Perl extension Subtitles.
 
 1.03    Apr 1 2010
 	- read u16 text
+
+1.04    Feb 15 2010
+	- read utf8 text

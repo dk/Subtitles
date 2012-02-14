@@ -1,4 +1,4 @@
-# $Id: Subtitles.pm,v 1.21 2012/01/20 21:31:39 dk Exp $
+# $Id: Subtitles.pm,v 1.22 2012/02/14 13:21:48 dk Exp $
 package Subtitles;
 use strict;
 require Exporter;
@@ -6,7 +6,7 @@ use vars qw(@ISA @EXPORT @EXPORT_OK @codecs $VERSION);
 @ISA = qw(Exporter);
 @EXPORT = qw(codecs time2str);
 @EXPORT_OK = qw(codecs time2hms time2shms hms2time time2str);
-$VERSION = '1.03';
+$VERSION = '1.04';
 		
 use Encode;
 
