@@ -190,7 +190,7 @@ for my $ref ( map { \$_ } grep { defined } ( @in, $zip, $merge)) {
 		$ret = $entry-> load(\*STDIN);
 		$fn = 'stdin';
 	} else {
-		open F, "< $fn" or die "Error: cannot open $_:$!\n";
+		open F, "< $fn" or die "Error: cannot open $fn:$!\n";
 		$ret = $entry-> load(\*F);
 		close F;
 		$fn = "'$fn'";
