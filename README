@@ -46,6 +46,10 @@ Zip two subtitles together -- read time information from one, text from another
 
     subs -z time.sub text.sub
 
+Merge two subtitles together
+
+    subs -m lang1.sub lang2.sub
+
 INSTALLATION
 ============
 

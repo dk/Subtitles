@@ -6,8 +6,8 @@ use Subtitles;
 my @in;
 my $out  = 'out.sub';
 my $jtime = 2;
-my $a;
-my $b;
+my $A;
+my $B;
 my $d;
 my @eval;
 my $split;
@@ -19,6 +19,7 @@ my @points;
 my @q = (0, 'end');
 my $do_q;
 my $zip;
+my $merge;
 my $inplace;
 
 sub usage
@@ -38,7 +39,7 @@ options:
    -c codec  - use codec to write file ( one of: '@codecs' )
    -d        - try to prolong duration of quickly disappearing text
    -e code   - run perl code for each line of text in file. On each
-               run, the text and time variables are initialized, and 
+               run, the text and time variables are initialized, and
 	       new values, if any, written to the file. The variables
 	       are used for:
 	       \$_ - subtitle text line
@@ -51,22 +52,24 @@ options:
    -h        - display this text
    -i        - edit files in place ( makes backup in .bak files )
    -j sec    - time interval between joins, seconds (default 2)
+   -m file2  - merge two subtitles togeter, mixing time and text
+               from both files
    -o file   - file to save processed subtitles (default out.sub)
    -O        - separate overlapped lines
    -p t1 t2  - set a control point, where t1 is time of a phrase
-               spoken in the film and t2 is time when the same 
-	       phrase as appears in the subtitle. Two points are 
-	       required for deducing -a and -b coefficients; if 
+               spoken in the film and t2 is time when the same
+	       phrase as appears in the subtitle. Two points are
+	       required for deducing -a and -b coefficients; if
 	       only one point is specified, it is assumed that
-	       the other one is [0,0]. Times can be relative, f.ex. 
+	       the other one is [0,0]. Times can be relative, f.ex.
 	       -p 01:00 +3.5 -p -20 1:00:00 
-   -P t2 t1    same as -p but reversed arguments ( use if -p was 
+   -P t2 t1    same as -p but reversed arguments ( use if -p was
                given in wrong order )
    -r rate   - force frame-per-second rate for frame-based subs.
                Useful numbers are 23.976, 24, 25.
    -s time   - split in two parts by time
    -q t1 t2  - restrict changes, if any, in time span t1-t2. Word
-               'end' can be used as an alias to the end of the 
+               'end' can be used as an alias to the end of the
 	       file. Default values are '0' and 'end'.
    -v        - be verbose
    -z file2  - zip subtitle files so time information is read from
@@ -117,13 +120,13 @@ USAGE
 				push @eval, nextarg;
 				$do = 1;
 			} elsif ( $1 eq 'a') {
-				$a = nextarg;
+				$A = nextarg;
 				$do = 1;
 				die "Invalid -a parameter `$a'\n"
-					unless $a =~ /^(\-?\d+(?:\.\d+)?)(?:\/(\d+(?:\.\d+)?))?/;
+					unless $A =~ /^(\-?\d+(?:\.\d+)?)(?:\/(\d+(?:\.\d+)?))?/;
 				if ( defined $2) {
 					die "Divizion by zero\n" if $2 == 0;
-					$a = $1/$2;
+					$A = $1/$2;
 				}
 			} elsif ( $1 eq 'c') {
 				$codec = nextarg;
@@ -133,7 +136,7 @@ USAGE
 					unless exists $c{$codec};
 				$do = 1;
 			} elsif ( $1 eq 'b') {
-				$b = nextarg;
+				$B = nextarg;
 				$do = 1;
 			} elsif ( $1 eq 'p' or $1 eq 'P') {
 				die "Too many control points\n" if 2 == @points;
@@ -151,6 +154,9 @@ USAGE
 					unless $rate =~ /^\d+(\.\d+)?$/;
 			} elsif ( $1 eq 's') {
 				$split = nextarg;
+				$do = 1;
+			} elsif ( $1 eq 'm') {
+				$merge = nextarg;
 				$do = 1;
 			} elsif ( $1 eq 'z') {
 				$zip = nextarg;
@@ -175,11 +181,11 @@ USAGE
 
 # read files
 my $dest;
-my @entries;
-for my $fn ( grep { defined } ( @in, $zip)) {
+for my $ref ( map { \$_ } grep { defined } ( @in, $zip, $merge)) {
 	my $entry = Subtitles->new();
 	$entry-> rate( $rate) if $rate;
 	my $ret;
+	my $fn = $$ref;
 	if ( $fn eq '-') {
 		$ret = $entry-> load(\*STDIN);
 		$fn = 'stdin';
@@ -195,10 +201,9 @@ for my $fn ( grep { defined } ( @in, $zip)) {
 		$c =~ s/Subtitles::Codec:://;
 		warn "read $l line(s) from $fn, codec=$c\n" if $verbose;
 	}
-	push @entries, $entry;
+	$$ref = $entry;
 }
-$zip = pop @entries if $zip;
-$dest = shift @entries;
+$dest = shift @in;
 
 # validate time-based parameters
 if ( defined $split) {
@@ -237,7 +242,7 @@ unshift @points, [0,0] if 1 == @points;
 if ( 2 == @points) {
 	my ( $t1, $u1) = @{$points[0]};
 	my ( $t2, $u2) = @{$points[1]};
-	die "-p option conflicts with -a and -b\n" if defined($a) || defined($b);
+	die "-p option conflicts with -a and -b\n" if defined($A) || defined($B);
 	my ( $dt, $du) = ( $t2 - $t1, $u2 - $u1);
 	die "Point sets refers to the same time\n" if $dt == 0 || $du == 0;
 # 
@@ -250,29 +255,29 @@ if ( 2 == @points) {
 #    ----------------------
 #	 t1       t2	  
 #
-	$a = $dt / $du;
-	$b = $t1 - $u1 * $a;
+	$A = $dt / $du;
+	$B = $t1 - $u1 * $A;
 
 	warn "control points [", time2str($t1), ",", time2str($u1), "], [",
 		 time2str($t2), ",", time2str($u2),
 		"]\n" if $verbose;
-	$b = time2str( $b);
+	$B = time2str( $B);
 }
 
 # a & b
-$a = 1 unless defined $a;
-if ( defined $b) {
-	my $bb = $dest-> parse_time( $b);
-	die "Cannot parse time `$b'\n" unless defined $bb;
-	$b = $bb;
-	warn "a=$a,b='". time2str($b) . "'\n" if $verbose;
+$A = 1 unless defined $A;
+if ( defined $B) {
+	my $bb = $dest-> parse_time( $B);
+	die "Cannot parse time `$B'\n" unless defined $bb;
+	$B = $bb;
+	warn "a=$A,b='". time2str($B) . "'\n" if $verbose;
 } else {
-	$b = 0;
-	warn "a=$a,b=$b\n" if $verbose;
+	$B = 0;
+	warn "a=$A,b=$B\n" if $verbose;
 }
 
 # process
-$dest-> join( $_, $jtime) for @entries; # join
+$dest-> join( $_, $jtime) for @in; # join
 
 # zip
 if ( $zip) {
@@ -299,7 +304,28 @@ if ( $zip) {
 	}
 	for ( my $i = 0; $i < $n1; $i++) {
 		 ($$f2[$i], $$t2[$i]) = ( $$f1[$i], $$t1[$i]);
-	}		
+	}
+}
+
+if ($merge) {
+	my $f1 = $merge->{from};
+	my $t1 = $merge->{to};
+	my $x1 = $merge->{text};
+	my $f2 = $dest->{from};
+	my $t2 = $dest->{to};
+	my $x2 = $dest->{text};
+
+	my @mess;
+	for ( my $i = 0; $i < @$f1; $i++) {
+		push @mess, [ $$f1[$i], $$t1[$i], $$x1[$i] ];
+	}
+	for ( my $i = 0; $i < @$f2; $i++) {
+		push @mess, [ $$f2[$i], $$t2[$i], $$x2[$i] ];
+	}
+	@mess = sort { $$a[0] <=> $$b[0] } @mess;
+	$dest->{from} = [ map { $$_[0] } @mess ];
+	$dest->{to}   = [ map { $$_[1] } @mess ];
+	$dest->{text} = [ map { $$_[2] } @mess ];
 }
 
 # brackets and transform
@@ -315,7 +341,7 @@ for ( @q) {
 	$vv_q .= time2str($_) . ' ';
 }
 warn "$vv_q ]\n" if $verbose;
-$dest-> transform( $a, $b, @q);
+$dest-> transform( $A, $B, @q);
 
 # prolong timing
 if ( $d) {
@@ -510,6 +536,10 @@ Edit files in place ( makes backup in .bak files )
 =item -j sec
 
 Time interval between joins, seconds (default 2)
+
+=item -m file.sub
+
+Merge two subtitles togeter, mixing time and text from both files.
 
 =item -o file
 
