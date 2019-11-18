@@ -11,4 +11,9 @@ WriteMakefile(
       (ABSTRACT_FROM => 'Subtitles.pm', # retrieve abstract from module
        AUTHOR     => 'Dmitry Karasik <dmitry@karasik.eu.org>') : ()),
     'EXE_FILES'         => ['subs', 'subplay'],
+    META_MERGE	   => {
+	resources  => {
+		repository => 'https://github.com/dk/Subtitles',
+	},
+    },
 );
